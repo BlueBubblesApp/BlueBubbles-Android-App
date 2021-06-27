@@ -237,11 +237,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
                   SettingsTile(
                     title: "Attachment Settings",
                     onTap: () {
-                      Navigator.of(context).push(
-                        CupertinoPageRoute(
-                          builder: (context) => AttachmentPanel(),
-                        ),
-                      );
+                      Get.toNamed("/settings/attachment-panel");
                     },
                     trailing: nextIcon,
                   ),
@@ -527,7 +523,7 @@ class SettingsTextField extends StatelessWidget {
   }
 }
 
-class SettingsSwitch extends StatefulWidget {
+class SettingsSwitch extends StatelessWidget {
   SettingsSwitch({
     Key key,
     this.initialVal,
@@ -539,39 +535,18 @@ class SettingsSwitch extends StatefulWidget {
   final String title;
 
   @override
-  _SettingsSwitchState createState() => _SettingsSwitchState();
-}
-
-class _SettingsSwitchState extends State<SettingsSwitch> {
-  bool _value;
-
-  @override
-  void initState() {
-    super.initState();
-    _value = widget.initialVal;
-  }
-
-  @override
   Widget build(BuildContext context) {
     return SwitchListTile(
       title: Text(
-        widget.title,
+        title,
         style: Theme.of(context).textTheme.bodyText1,
       ),
-      value: _value,
+      value: initialVal,
       activeColor: Theme.of(context).primaryColor,
       activeTrackColor: Theme.of(context).primaryColor.withAlpha(200),
       inactiveTrackColor: Theme.of(context).accentColor.withOpacity(0.6),
       inactiveThumbColor: Theme.of(context).accentColor,
-      onChanged: (bool val) {
-        widget.onChanged(val);
-
-        if (!this.mounted) return;
-
-        setState(() {
-          _value = val;
-        });
-      },
+      onChanged: onChanged,
     );
   }
 }
@@ -689,71 +664,49 @@ class _SettingsOptionsState<T> extends State<SettingsOptions<T>> {
   }
 }
 
-class SettingsSlider extends StatefulWidget {
+class SettingsSlider extends StatelessWidget {
   SettingsSlider(
-      {@required this.startingVal,
-      this.update,
-      @required this.text,
-      this.formatValue,
-      @required this.min,
-      @required this.max,
-      @required this.divisions,
-      Key key})
+      {@required this.currentVal,
+        this.update,
+        @required this.text,
+        this.formatValue,
+        @required this.min,
+        @required this.max,
+        @required this.divisions,
+        Key key})
       : super(key: key);
 
-  final double startingVal;
   final Function(double val) update;
   final String text;
   final Function(double value) formatValue;
   final double min;
   final double max;
   final int divisions;
-
-  @override
-  _SettingsSliderState createState() => _SettingsSliderState();
-}
-
-class _SettingsSliderState extends State<SettingsSlider> {
-  double currentVal = 500;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.startingVal > 0 && widget.startingVal < 5000) {
-      currentVal = widget.startingVal;
-    }
-  }
+  final double currentVal;
 
   @override
   Widget build(BuildContext context) {
     String value = currentVal.toString();
-    if (widget.formatValue != null) {
-      value = widget.formatValue(currentVal);
+    if (formatValue != null) {
+      value = formatValue(currentVal);
     }
 
     return Column(
       children: <Widget>[
         ListTile(
           title: Text(
-            "${widget.text}: $value",
+            "$text: $value",
             style: Theme.of(context).textTheme.bodyText1,
           ),
           subtitle: Slider(
             activeColor: Theme.of(context).primaryColor,
             inactiveColor: Theme.of(context).primaryColor.withOpacity(0.2),
             value: currentVal,
-            onChanged: (double value) {
-              if (!this.mounted) return;
-
-              setState(() {
-                currentVal = value;
-                widget.update(currentVal);
-              });
-            },
+            onChanged: update,
             label: value,
-            divisions: widget.divisions,
-            min: widget.min,
-            max: widget.max,
+            divisions: divisions,
+            min: min,
+            max: max,
           ),
         ),
         Divider(
